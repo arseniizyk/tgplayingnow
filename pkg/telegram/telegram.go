@@ -5,7 +5,6 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/arseniizyk/tgplayingnow/internal/config"
 	"github.com/skip2/go-qrcode"
 	"github.com/zelenin/go-tdlib/client"
 )
@@ -13,18 +12,6 @@ import (
 type Telegram interface {
 	Login() error
 	UpdateBio(text string) error
-}
-
-type telegram struct {
-	cfg    config.Config
-	OldBio string
-	client *client.Client
-}
-
-func New(cfg config.Config) Telegram {
-	return &telegram{
-		cfg: cfg,
-	}
 }
 
 func (t *telegram) Login() error {

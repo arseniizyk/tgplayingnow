@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/arseniizyk/tgplayingnow/pkg/spotify/utils"
 	"github.com/pkg/browser"
 	"golang.org/x/oauth2"
 )
@@ -30,7 +29,7 @@ const (
 )
 
 func (s *spotify) Login() error {
-	verifier, challenge := utils.GenerateCodeVerifierAndChallenge()
+	verifier, challenge := GenerateCodeVerifierAndChallenge()
 	cfg := &oauth2.Config{
 		ClientID:    s.cfg.SpotifyClientID(),
 		RedirectURL: redirectUri,
@@ -41,7 +40,7 @@ func (s *spotify) Login() error {
 		},
 	}
 
-	authURL := utils.BuildAuthURL(cfg, challenge)
+	authURL := BuildAuthURL(cfg, challenge)
 
 	browser.OpenURL(authURL)
 
@@ -126,7 +125,7 @@ func (s *spotify) GetCurrentlyPlaying() (*strings.Builder, error) {
 			return nil, err
 		}
 
-		track := utils.FormatTrack(tr.Item.Name, tr.Item.Artists)
+		track := FormatTrack(tr.Item.Name, tr.Item.Artists)
 		log.Println("Playing now:", track)
 		return track, nil
 
@@ -179,7 +178,7 @@ func handleCallback(cfg *oauth2.Config, verifier string) (*oauth2.Token, error) 
 		return nil, err
 	}
 
-	token, err := utils.TokenExchange(cfg, code, verifier)
+	token, err := TokenExchange(cfg, code, verifier)
 	if err != nil {
 		return nil, err
 	}
