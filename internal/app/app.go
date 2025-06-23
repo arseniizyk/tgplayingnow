@@ -1,7 +1,9 @@
 package app
 
 import (
+	"log"
 	"os"
+	"time"
 
 	"github.com/arseniizyk/tgplayingnow/internal/config"
 	"github.com/arseniizyk/tgplayingnow/pkg/spotify"
@@ -14,57 +16,69 @@ type App interface {
 }
 
 type app struct {
+	c       config.Config
+	s       storage.Storage
+	spotify spotify.Spotify
+	tg      telegram.Telegram
 }
 
-func New() App {
-	return app{}
+func New(c config.Config, s storage.Storage, spotify spotify.Spotify, tg telegram.Telegram) App {
+	return &app{c, s, spotify, tg}
 }
 
 func (a app) Run() error {
-	cfg, err := config.New()
-	if err != nil {
+	refreshToken, err := a.s.GetRefreshToken()
+	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
 
-	storage, err := storage.New()
-	if err != nil {
-		return err
-	}
-
-	spotify := spotify.New(cfg, storage)
-	if err := spotify.Login(); err != nil {
-		return err
-	}
-
-	telegram := telegram.New(cfg)
-	err = telegram.Login()
-	if err != nil {
-		return err
-	}
-
-	refreshToken, err := storage.GetRefreshToken()
-	if err != nil {
-		if os.IsNotExist(err) {
-			err := spotify.Login()
-			if err != nil {
-				return err
-			}
-		} else {
+	if refreshToken == "" {
+		err := a.spotify.Login()
+		if err != nil {
 			return err
 		}
 	} else {
-		spotify.RefreshAccessToken()
+		err := a.spotify.RefreshAccessToken(refreshToken)
+		if err != nil {
+			return err
+		}
 	}
 
-	return nil
+	err = a.tg.Login()
+	if err != nil {
+		return err
+	}
 
-	// for {
-	// 	track, err := spotify.GetCurrentlyPlaying()
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	log.Println(track.String())
-	// 	time.Sleep(15 * time.Second)
-	// }
+	go GetTrackAndUpdateBio(a.spotify, a.tg)
+	go func() {
+		for {
+			time.Sleep(30 * time.Minute) // can be 60 min
+			err := a.spotify.RefreshAccessToken()
+			log.Printf("Cant update refresh token %v", err)
+		}
+	}()
+	select {}
+}
 
+func GetTrackAndUpdateBio(s spotify.Spotify, t telegram.Telegram) {
+	var prev string
+	for {
+		track, err := s.GetCurrentlyPlaying()
+		if err != nil {
+			log.Printf("Error getting track, waiting 10 seconds: %v", err)
+			time.Sleep(10 * time.Second)
+			continue
+		}
+
+		if prev != track.String() {
+			prev = track.String()
+			err = t.UpdateBio(track.String())
+			if err != nil {
+				log.Printf("Error updating bio, waiting 10 seconds: %v", err)
+				time.Sleep(10 * time.Second)
+			}
+		}
+
+		time.Sleep(15 * time.Second)
+	}
 }

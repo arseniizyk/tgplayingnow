@@ -43,9 +43,24 @@ func (t *telegram) Login() error {
 		SystemVersion:       "1.0.0",
 		ApplicationVersion:  "1.0.0",
 	}
+	_, err := client.SetLogVerbosityLevel(&client.SetLogVerbosityLevelRequest{
+		NewVerbosityLevel: 0,
+	})
+	if err != nil {
+		return fmt.Errorf("SetLogVerbosityLevel error: %v", err)
+	}
 
 	authorizer := client.QrAuthorizer(params, func(link string) error {
-		return qrcode.WriteFile(link, qrcode.Medium, 256, "qr.png")
+		err := qrcode.WriteFile(link, qrcode.Medium, 256, "qr.png")
+		if err != nil {
+			return fmt.Errorf("failed to write QR code: %w", err)
+		}
+
+		if err := openFile("./qr.png"); err != nil {
+			log.Printf("failed to open QR code image: %v", err)
+		}
+
+		return nil
 	})
 
 	tdlibClient, err := client.NewClient(authorizer)
@@ -54,7 +69,12 @@ func (t *telegram) Login() error {
 	}
 
 	t.client = tdlibClient
-	u, _ := t.client.GetMe()
+	u, err := t.client.GetMe()
+	if err != nil {
+		return fmt.Errorf("GetMe error: %w", err)
+	}
+
+	log.Printf("%s | %s | [%s] \n", u.FirstName, u.LastName, u.Usernames.ActiveUsernames)
 
 	info, err := t.client.GetUserFullInfo(&client.GetUserFullInfoRequest{UserId: u.Id})
 	if err != nil {
@@ -68,5 +88,6 @@ func (t *telegram) Login() error {
 
 func (t *telegram) UpdateBio(text string) error {
 	_, err := t.client.SetBio(&client.SetBioRequest{Bio: text})
+	log.Println("Updating bio:", text)
 	return err
 }

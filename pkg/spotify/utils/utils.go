@@ -47,7 +47,7 @@ func FormatTrack(name string, artists []struct {
 		joined := strings.Join(allArtists, ", ")
 		result := fmt.Sprintf("%s - %s", name, joined)
 
-		if len(result) <= maxBioLength {
+		if len([]rune(result)) <= maxBioLength {
 			builder.WriteString(result)
 			return builder
 		}

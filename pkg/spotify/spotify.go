@@ -19,7 +19,7 @@ import (
 type Spotify interface {
 	Login() error
 	GetCurrentlyPlaying() (*strings.Builder, error)
-	RefreshAccessToken() error
+	RefreshAccessToken(...string) error
 }
 
 const (
@@ -52,11 +52,16 @@ func (s *spotify) Login() error {
 
 	s.accessToken = token.AccessToken
 	s.refreshToken = token.RefreshToken
+	s.storage.SaveRefreshToken(s.refreshToken)
 
 	return nil
 }
 
-func (s *spotify) RefreshAccessToken() error {
+func (s *spotify) RefreshAccessToken(refreshToken ...string) error {
+	if refreshToken != nil && refreshToken[0] != "" {
+		s.refreshToken = refreshToken[0]
+	}
+
 	body := url.Values{}
 	body.Add("grant_type", "refresh_token")
 	body.Add("refresh_token", s.refreshToken)
@@ -87,6 +92,7 @@ func (s *spotify) RefreshAccessToken() error {
 
 	if token.RefreshToken != "" {
 		s.refreshToken = token.RefreshToken
+		s.storage.SaveRefreshToken(s.refreshToken)
 	}
 
 	s.accessToken = token.AccessToken
@@ -119,6 +125,7 @@ func (s *spotify) GetCurrentlyPlaying() (*strings.Builder, error) {
 		}
 
 		track := utils.FormatTrack(tr.Item.Name, tr.Item.Artists)
+		log.Println("Playing now:", track)
 		return track, nil
 
 	case http.StatusUnauthorized:
@@ -127,6 +134,8 @@ func (s *spotify) GetCurrentlyPlaying() (*strings.Builder, error) {
 		return nil, ErrBadOauth
 	case http.StatusTooManyRequests:
 		return nil, ErrRateLimits
+	case http.StatusNoContent:
+		return nil, ErrNoContent
 	default:
 		log.Println(resp.StatusCode)
 		return nil, ErrUnexpectedStatusCode

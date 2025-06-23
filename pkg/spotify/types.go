@@ -28,6 +28,7 @@ var (
 	ErrBadOauth             = errors.New("bad OAuth request")
 	ErrRateLimits           = errors.New("too many requests, probably rate limits")
 	ErrUnexpectedStatusCode = errors.New("unexpected status code")
+	ErrNoContent            = errors.New("not playing now")
 )
 
 func New(cfg config.Config, storage storage.Storage) Spotify {
