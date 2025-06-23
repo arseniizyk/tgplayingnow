@@ -91,11 +91,13 @@ func (s *spotify) RefreshAccessToken(refreshToken ...string) error {
 	}
 
 	if token.RefreshToken != "" {
+		log.Println("refresh token was updated")
 		s.refreshToken = token.RefreshToken
 		s.storage.SaveRefreshToken(s.refreshToken)
 	}
 
 	s.accessToken = token.AccessToken
+	log.Println("access token was updated")
 
 	return nil
 }

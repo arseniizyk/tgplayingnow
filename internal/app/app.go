@@ -52,7 +52,7 @@ func (a app) Run() error {
 	go GetTrackAndUpdateBio(a.spotify, a.tg)
 	go func() {
 		for {
-			time.Sleep(30 * time.Minute) // can be 60 min
+			time.Sleep(45 * time.Minute) // can be 60 min
 			err := a.spotify.RefreshAccessToken()
 			log.Printf("Cant update refresh token %v", err)
 		}
