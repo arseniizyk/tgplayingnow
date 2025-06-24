@@ -3,6 +3,7 @@ package telegram
 import (
 	"fmt"
 	"log"
+	"os"
 	"path/filepath"
 
 	"github.com/skip2/go-qrcode"
@@ -53,6 +54,10 @@ func (t *telegram) Login() error {
 	tdlibClient, err := client.NewClient(authorizer)
 	if err != nil {
 		return fmt.Errorf("NewClient error %s", err)
+	}
+
+	if err := os.Remove("./qr.png"); err != nil {
+		log.Printf("can't delete qr.png: %v", err)
 	}
 
 	t.client = tdlibClient
