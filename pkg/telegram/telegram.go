@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 
 	"github.com/skip2/go-qrcode"
 	"github.com/zelenin/go-tdlib/client"
@@ -13,30 +12,11 @@ import (
 type Telegram interface {
 	Login() error
 	UpdateBio(text string) error
+	ResetBio() error
 }
 
 func (t *telegram) Login() error {
-	params := &client.SetTdlibParametersRequest{
-		UseTestDc:           false,
-		DatabaseDirectory:   filepath.Join(".tdlib", "database"),
-		FilesDirectory:      filepath.Join(".tdlib", "files"),
-		UseFileDatabase:     false,
-		UseChatInfoDatabase: false,
-		UseMessageDatabase:  false,
-		UseSecretChats:      false,
-		ApiId:               t.cfg.TelegramAppId(),
-		ApiHash:             t.cfg.TelegramAppHash(),
-		SystemLanguageCode:  "en",
-		DeviceModel:         "Server",
-		SystemVersion:       "1.0.0",
-		ApplicationVersion:  "1.0.0",
-	}
-	_, err := client.SetLogVerbosityLevel(&client.SetLogVerbosityLevelRequest{
-		NewVerbosityLevel: 0,
-	})
-	if err != nil {
-		return fmt.Errorf("SetLogVerbosityLevel error: %v", err)
-	}
+	params := generateParams(t.cfg.TelegramAppId(), t.cfg.TelegramAppHash())
 
 	authorizer := client.QrAuthorizer(params, func(link string) error {
 		err := qrcode.WriteFile(link, qrcode.Medium, 256, "qr.png")
@@ -58,26 +38,37 @@ func (t *telegram) Login() error {
 
 	defer os.Remove("./qr.png")
 
-	t.client = tdlibClient
-	u, err := t.client.GetMe()
+	t.c = tdlibClient
+	u, err := t.c.GetMe()
 	if err != nil {
 		return fmt.Errorf("GetMe error: %w", err)
 	}
 
 	log.Printf("%s | %s | [%s] \n", u.FirstName, u.LastName, u.Usernames.ActiveUsernames)
 
-	info, err := t.client.GetUserFullInfo(&client.GetUserFullInfoRequest{UserId: u.Id})
+	info, err := t.c.GetUserFullInfo(&client.GetUserFullInfoRequest{UserId: u.Id})
 	if err != nil {
 		log.Println("cant get previous bio", err)
+	} else {
+		log.Println(info.Bio.Text)
+		t.oldBio = info.Bio.Text
 	}
-
-	t.OldBio = info.Bio.Text
 
 	return nil
 }
 
 func (t *telegram) UpdateBio(text string) error {
-	_, err := t.client.SetBio(&client.SetBioRequest{Bio: text})
+	_, err := t.c.SetBio(&client.SetBioRequest{Bio: text})
 	log.Println("Updating bio:", text)
 	return err
+}
+
+func (t *telegram) ResetBio() error {
+	_, err := t.c.SetBio(&client.SetBioRequest{Bio: t.oldBio})
+	if err != nil {
+		return fmt.Errorf("Error returning old bio")
+	}
+
+	log.Printf("Old bio %s was returned\n", t.oldBio)
+	return nil
 }

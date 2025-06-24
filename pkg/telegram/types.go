@@ -1,18 +1,42 @@
 package telegram
 
 import (
+	"path/filepath"
+
 	"github.com/arseniizyk/tgplayingnow/internal/config"
 	"github.com/zelenin/go-tdlib/client"
 )
 
 type telegram struct {
 	cfg    config.Config
-	OldBio string
-	client *client.Client
+	oldBio string
+	c      *client.Client
 }
 
 func New(cfg config.Config) Telegram {
 	return &telegram{
 		cfg: cfg,
+	}
+}
+
+func generateParams(appId int32, appHash string) *client.SetTdlibParametersRequest {
+	client.SetLogVerbosityLevel(&client.SetLogVerbosityLevelRequest{
+		NewVerbosityLevel: 0,
+	})
+
+	return &client.SetTdlibParametersRequest{
+		UseTestDc:           false,
+		DatabaseDirectory:   filepath.Join(".tdlib", "database"),
+		FilesDirectory:      filepath.Join(".tdlib", "files"),
+		UseFileDatabase:     false,
+		UseChatInfoDatabase: false,
+		UseMessageDatabase:  false,
+		UseSecretChats:      false,
+		ApiId:               appId,
+		ApiHash:             appHash,
+		SystemLanguageCode:  "en",
+		DeviceModel:         "Server",
+		SystemVersion:       "1.0.0",
+		ApplicationVersion:  "1.0.0",
 	}
 }

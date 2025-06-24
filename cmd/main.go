@@ -2,6 +2,9 @@ package main
 
 import (
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/arseniizyk/tgplayingnow/internal/app"
 	"github.com/arseniizyk/tgplayingnow/internal/config"
@@ -11,6 +14,10 @@ import (
 )
 
 func main() {
+	sigCh := make(chan os.Signal, 1)
+
+	signal.Notify(sigCh, syscall.SIGTERM, syscall.SIGINT)
+
 	cfg, err := config.New()
 	if err != nil {
 		log.Fatal(err)
@@ -26,7 +33,14 @@ func main() {
 
 	app := app.New(cfg, storage, spotify, telegram)
 
-	if err := app.Run(); err != nil {
-		log.Fatal(err)
+	go func() {
+		if err := app.Run(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	<-sigCh
+	if err := telegram.ResetBio(); err != nil {
+		log.Fatalf("failed to reset bio: %v", err)
 	}
 }
