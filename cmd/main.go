@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 	"os/signal"
@@ -14,8 +15,10 @@ import (
 )
 
 func main() {
-	sigCh := make(chan os.Signal, 1)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
+	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGTERM, syscall.SIGINT)
 
 	cfg, err := config.New()
@@ -30,16 +33,18 @@ func main() {
 
 	spotify := spotify.New(cfg, storage)
 	telegram := telegram.New(cfg)
-
 	app := app.New(cfg, storage, spotify, telegram)
 
 	go func() {
-		if err := app.Run(); err != nil {
+		if err := app.Run(ctx); err != nil {
 			log.Fatal(err)
 		}
 	}()
 
 	<-sigCh
+	log.Println("shutting down")
+	cancel()
+
 	if err := telegram.ResetBio(); err != nil {
 		log.Fatalf("failed to reset bio: %v", err)
 	}
