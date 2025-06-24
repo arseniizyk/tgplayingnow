@@ -1,4 +1,4 @@
-# Show tracks from spotify in telegram bio
+# Shows tracks from spotify in telegram bio
 
 ## 🚀 Usage
 
