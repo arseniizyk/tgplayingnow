@@ -56,9 +56,7 @@ func (t *telegram) Login() error {
 		return fmt.Errorf("NewClient error %s", err)
 	}
 
-	if err := os.Remove("./qr.png"); err != nil {
-		log.Printf("can't delete qr.png: %v", err)
-	}
+	defer os.Remove("./qr.png")
 
 	t.client = tdlibClient
 	u, err := t.client.GetMe()
