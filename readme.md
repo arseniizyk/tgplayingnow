@@ -2,7 +2,7 @@
 
 ## 🚀 Usage
 
--   Install [tdlib](<[tdlib](https://tdlib.github.io/td/build.html)>) , create .env in root, write your variables from [spotify developers](https://developer.spotify.com/), [telegram app](https://my.telegram.org/apps) and use it with
+-   Install [tdlib](https://tdlib.github.io/td/build.html) , create .env in root, write your variables from [spotify developers](https://developer.spotify.com/), [telegram app](https://my.telegram.org/apps) and use it with
     ```go
     go run main.go
     ```
