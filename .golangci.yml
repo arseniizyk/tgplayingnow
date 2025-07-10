@@ -1,10 +1,4 @@
 version: '2'
-
+# only for local golangci-lint run with compiled tdlib
 run:
     timeout: 5m
-
-linters:
-    disable:
-        - unused
-        - staticcheck
-        - govet

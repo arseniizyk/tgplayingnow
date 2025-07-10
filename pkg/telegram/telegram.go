@@ -3,7 +3,6 @@ package telegram
 import (
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/skip2/go-qrcode"
 	"github.com/zelenin/go-tdlib/client"
@@ -29,8 +28,6 @@ func (t *Telegram) Login() error {
 	if err != nil {
 		return fmt.Errorf("NewClient error %s", err)
 	}
-
-	defer os.Remove("./qr.png")
 
 	t.c = tdlibClient
 	u, err := t.c.GetMe()
@@ -60,7 +57,7 @@ func (t *Telegram) UpdateBio(text string) error {
 func (t *Telegram) ResetBio() error {
 	_, err := t.c.SetBio(&client.SetBioRequest{Bio: t.oldBio})
 	if err != nil {
-		return fmt.Errorf("Error returning old bio")
+		return fmt.Errorf("error while returning old bio")
 	}
 
 	log.Printf("Old bio %s was returned\n", t.oldBio)

@@ -20,7 +20,7 @@ func New(cfg config.Config) *Telegram {
 }
 
 func generateParams(appId int32, appHash string) *client.SetTdlibParametersRequest {
-	client.SetLogVerbosityLevel(&client.SetLogVerbosityLevelRequest{
+	client.SetLogVerbosityLevel(&client.SetLogVerbosityLevelRequest{ //nolint:all
 		NewVerbosityLevel: 0,
 	})
 

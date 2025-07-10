@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/arseniizyk/tgplayingnow/pkg/spotify/utils"
 	"github.com/pkg/browser"
 	"golang.org/x/oauth2"
 )
@@ -36,7 +37,10 @@ func (s *Spotify) Login() error {
 
 	authURL := BuildAuthURL(cfg, challenge)
 
-	browser.OpenURL(authURL)
+	err := browser.OpenURL(authURL)
+	if err != nil {
+		log.Printf("cant open browser %v, try to open it manually %s", err, authURL)
+	}
 
 	token, err := handleCallback(cfg, verifier)
 	if err != nil {
@@ -45,7 +49,10 @@ func (s *Spotify) Login() error {
 
 	s.accessToken = token.AccessToken
 	s.refreshToken = token.RefreshToken
-	s.storage.SaveRefreshToken(s.refreshToken)
+	if err := s.storage.SaveRefreshToken(s.refreshToken); err != nil {
+		log.Println("cant save refresh token", err)
+		return err
+	}
 
 	return nil
 }
@@ -70,7 +77,7 @@ func (s *Spotify) RefreshAccessToken(refreshToken ...string) error {
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer utils.Dclose(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		respBody, _ := io.ReadAll(resp.Body)
@@ -86,7 +93,10 @@ func (s *Spotify) RefreshAccessToken(refreshToken ...string) error {
 	if token.RefreshToken != "" {
 		log.Println("refresh token was updated")
 		s.refreshToken = token.RefreshToken
-		s.storage.SaveRefreshToken(s.refreshToken)
+		if err := s.storage.SaveRefreshToken(s.refreshToken); err != nil {
+			log.Println("cant update refresh token", err)
+			return err
+		}
 	}
 
 	s.accessToken = token.AccessToken
@@ -109,7 +119,7 @@ func (s *Spotify) GetCurrentlyPlaying() (*strings.Builder, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer utils.Dclose(resp.Body)
 
 	switch resp.StatusCode {
 	case http.StatusOK:
@@ -147,7 +157,9 @@ func handleCallback(cfg *oauth2.Config, verifier string) (*oauth2.Token, error) 
 			http.Error(w, "Missing code", http.StatusBadRequest)
 			return
 		}
-		fmt.Fprintln(w, "You can close this tab")
+		if _, err := fmt.Fprintln(w, "You can close this tab"); err != nil {
+			log.Println(err)
+		}
 		codeCh <- code
 	})
 
