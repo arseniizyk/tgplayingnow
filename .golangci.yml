@@ -2,8 +2,3 @@ version: '2'
 
 run:
     timeout: 5m
-    skip-dirs:
-        - pkg/telegram
-
-linters:
-    enable-all: true
