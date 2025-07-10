@@ -7,6 +7,4 @@ linters:
     disable:
         - unused
         - staticcheck
-        - typecheck
-        - gosimple
         - govet
