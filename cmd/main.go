@@ -32,8 +32,8 @@ func main() {
 	}
 
 	spotify := spotify.New(cfg, storage)
-	telegram := telegram.New(cfg)
-	app := app.New(cfg, storage, spotify, telegram)
+	tg := telegram.New(cfg)
+	app := app.New(cfg, storage, spotify, tg)
 
 	go func() {
 		if err := app.Run(ctx); err != nil {
@@ -45,7 +45,7 @@ func main() {
 	log.Println("shutting down")
 	cancel()
 
-	if err := telegram.ResetBio(); err != nil {
+	if err := tg.ResetBio(); err != nil {
 		log.Fatalf("failed to reset bio: %v", err)
 	}
 }

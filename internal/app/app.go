@@ -19,11 +19,11 @@ type App interface {
 type app struct {
 	c       config.Config
 	s       storage.Storage
-	spotify spotify.Spotify
-	tg      telegram.Telegram
+	spotify *spotify.Spotify
+	tg      *telegram.Telegram
 }
 
-func New(c config.Config, s storage.Storage, spotify spotify.Spotify, tg telegram.Telegram) App {
+func New(c config.Config, s storage.Storage, spotify *spotify.Spotify, tg *telegram.Telegram) App {
 	return &app{c, s, spotify, tg}
 }
 
@@ -54,7 +54,7 @@ func (a app) Run(ctx context.Context) error {
 	return nil
 }
 
-func UpdateAccessAndRefreshToken(ctx context.Context, s spotify.Spotify) {
+func UpdateAccessAndRefreshToken(ctx context.Context, s *spotify.Spotify) {
 	ticker := time.NewTicker(45 * time.Minute)
 	defer ticker.Stop()
 	for {
@@ -69,7 +69,7 @@ func UpdateAccessAndRefreshToken(ctx context.Context, s spotify.Spotify) {
 	}
 }
 
-func GetTrackAndUpdateBio(ctx context.Context, s spotify.Spotify, t telegram.Telegram) {
+func GetTrackAndUpdateBio(ctx context.Context, s *spotify.Spotify, t *telegram.Telegram) {
 	var prev string
 	ticker := time.NewTicker(15 * time.Second)
 	defer ticker.Stop()

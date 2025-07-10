@@ -7,14 +7,14 @@ import (
 	"github.com/zelenin/go-tdlib/client"
 )
 
-type telegram struct {
+type Telegram struct {
 	cfg    config.Config
 	oldBio string
 	c      *client.Client
 }
 
-func New(cfg config.Config) Telegram {
-	return &telegram{
+func New(cfg config.Config) *Telegram {
+	return &Telegram{
 		cfg: cfg,
 	}
 }

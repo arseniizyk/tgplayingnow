@@ -15,12 +15,6 @@ import (
 	"golang.org/x/oauth2"
 )
 
-type Spotify interface {
-	Login() error
-	GetCurrentlyPlaying() (*strings.Builder, error)
-	RefreshAccessToken(...string) error
-}
-
 const (
 	scope       = "user-read-currently-playing"
 	redirectUri = "http://127.0.0.1:8080/spotify"
@@ -28,7 +22,7 @@ const (
 	tokenURL    = "https://accounts.spotify.com/api/token"
 )
 
-func (s *spotify) Login() error {
+func (s *Spotify) Login() error {
 	verifier, challenge := GenerateCodeVerifierAndChallenge()
 	cfg := &oauth2.Config{
 		ClientID:    s.cfg.SpotifyClientID(),
@@ -56,7 +50,7 @@ func (s *spotify) Login() error {
 	return nil
 }
 
-func (s *spotify) RefreshAccessToken(refreshToken ...string) error {
+func (s *Spotify) RefreshAccessToken(refreshToken ...string) error {
 	if refreshToken != nil && refreshToken[0] != "" {
 		s.refreshToken = refreshToken[0]
 	}
@@ -101,7 +95,7 @@ func (s *spotify) RefreshAccessToken(refreshToken ...string) error {
 	return nil
 }
 
-func (s *spotify) GetCurrentlyPlaying() (*strings.Builder, error) {
+func (s *Spotify) GetCurrentlyPlaying() (*strings.Builder, error) {
 	endpoint := "https://api.spotify.com/v1/me/player/currently-playing"
 
 	req, err := http.NewRequest(http.MethodGet, endpoint, nil)

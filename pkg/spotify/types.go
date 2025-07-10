@@ -16,7 +16,7 @@ type TrackResponse struct {
 	} `json:"item"`
 }
 
-type spotify struct {
+type Spotify struct {
 	storage      storage.Storage
 	cfg          config.Config
 	refreshToken string
@@ -31,8 +31,8 @@ var (
 	ErrNoContent            = errors.New("not playing now")
 )
 
-func New(cfg config.Config, storage storage.Storage) Spotify {
-	return &spotify{
+func New(cfg config.Config, storage storage.Storage) *Spotify {
+	return &Spotify{
 		storage: storage,
 		cfg:     cfg,
 	}

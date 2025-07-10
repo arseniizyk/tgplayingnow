@@ -9,13 +9,7 @@ import (
 	"github.com/zelenin/go-tdlib/client"
 )
 
-type Telegram interface {
-	Login() error
-	UpdateBio(text string) error
-	ResetBio() error
-}
-
-func (t *telegram) Login() error {
+func (t *Telegram) Login() error {
 	params := generateParams(t.cfg.TelegramAppId(), t.cfg.TelegramAppHash())
 
 	authorizer := client.QrAuthorizer(params, func(link string) error {
@@ -57,13 +51,13 @@ func (t *telegram) Login() error {
 	return nil
 }
 
-func (t *telegram) UpdateBio(text string) error {
+func (t *Telegram) UpdateBio(text string) error {
 	_, err := t.c.SetBio(&client.SetBioRequest{Bio: text})
 	log.Println("Updating bio:", text)
 	return err
 }
 
-func (t *telegram) ResetBio() error {
+func (t *Telegram) ResetBio() error {
 	_, err := t.c.SetBio(&client.SetBioRequest{Bio: t.oldBio})
 	if err != nil {
 		return fmt.Errorf("Error returning old bio")
