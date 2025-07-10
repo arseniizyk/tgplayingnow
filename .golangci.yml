@@ -5,14 +5,5 @@ run:
     skip-dirs:
         - pkg/telegram
 
-linters-settings:
-
 linters:
     enable-all: true
-
-issues:
-    exclude-rules:
-        - path: "pkg/telegram/.*\\.go"
-          linters:
-              - goanalysis_metalinter
-          text: 'could not load export data: no export data for "github.com/zelenin/go-tdlib/client"'
