@@ -1,0 +1,12 @@
+version: 2
+
+run:
+    timeout: 5m
+
+linters-settings:
+    typecheck:
+        skip-files:
+            - pkg/telegram/.*\.go
+
+linters:
+    enable-all: true
