@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 
 	"github.com/arseniizyk/tgplayingnow/internal/config"
-	"github.com/zelenin/go-tdlib/client"
+	"github.com/zelenin/go-tdlib/client" //nolint:all
 )
 
 type Telegram struct {

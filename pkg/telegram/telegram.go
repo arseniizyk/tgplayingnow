@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/skip2/go-qrcode"
-	"github.com/zelenin/go-tdlib/client"
+	"github.com/zelenin/go-tdlib/client" //nolint:all
 )
 
 func (t *Telegram) Login() error {
