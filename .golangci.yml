@@ -2,3 +2,9 @@ version: '2'
 
 run:
     timeout: 5m
+
+issues:
+    exclude-rules:
+        - path: ^github\.com/zelenin/go-tdlib/client$
+          linters:
+              - '*'
