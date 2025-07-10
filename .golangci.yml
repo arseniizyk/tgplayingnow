@@ -5,4 +5,8 @@ run:
 
 linters:
     disable:
-        - goanalysis_metalinter
+        - unused
+        - staticcheck
+        - typecheck
+        - gosimple
+        - govet
